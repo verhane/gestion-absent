@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PointageExport;
 use App\Models\ClassesPrStagiaire;
 use App\Models\DetailsPointage;
 use App\Models\RefPresent;
@@ -9,16 +10,19 @@ use Dcs\Admin\Models\SysUser;
 use Illuminate\Http\Request;
 use  App\Models\Pointage ;
 use   App\Models\Classe;
+use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 use Mpdf\Mpdf;
 class PointageController extends Controller
 {
+   private $view="pointages";
+   private $link = "pointages";
     public function index()
     {
         $pointages = Pointage::all();
         $classes = Classe::all();
         $surveillant = SysUser::query()->whereIn('id',Pointage::query()->select('personne'))->get();
-        return view('pointages.index', ['pointages' => $pointages ,'classes'=>$classes,'surveillant'=>$surveillant]);
+        return view($this->view.'.index', ['pointages' => $pointages ,'classes'=>$classes,'surveillant'=>$surveillant]);
     }
 
     public function getDT($classe_id='all' ,$admin='all',$date_debut='all',$date_fin='all' ,$selected = 'all')
@@ -36,7 +40,7 @@ class PointageController extends Controller
         }
         return DataTables::of($pointages)
             ->addColumn('actions', function ($pointage) {
-                $deleteLink = 'pointages/delete/' . $pointage->id;
+                $deleteLink = $this->link.'/delete/' . $pointage->id;
                 $actions = collect();
                 $actions->push([
                     'icon' => 'show',
@@ -99,7 +103,7 @@ class PointageController extends Controller
     public function get($id)
     {
         $pointage = Pointage::findOrFail($id);
-        $tablink = 'pointages/getTab/' . $id;
+        $tablink = $this->link.'/getTab/' . $id;
         $tabs = [
             '<i class="fa fa-info-circle"></i> info' => $tablink . '/1',
 //            '<i class="fa fa-user"></i> details ' => $tablink . '/2',
@@ -111,6 +115,7 @@ class PointageController extends Controller
         return view('tabs', [
             'tabs' => $tabs,
             'modal_title' => $modal_title,
+            'module' => $this->link
         ]);
     }
 
@@ -143,7 +148,7 @@ class PointageController extends Controller
                 ];
                 break;
         }
-        return view('pointages.tabs.tab' . $tab, $parametres);
+        return view($this->view.'.tabs.tab' . $tab, $parametres);
     }
 
     public function formAdd()
@@ -210,7 +215,19 @@ class PointageController extends Controller
             }
         }
     }
-
+     public function exportExcel($classe_id='all' ,$admin='all',$date_debut='all',$date_fin='all'){
+         $pointages = Pointage::query()->with('classes');
+         if($classe_id !='all'){
+             $pointages = $pointages->where('classe_id',$classe_id);
+         }
+         if($date_debut !='all' && $date_fin !='all'){
+             $pointages = $pointages->whereBetween('date',[$date_debut, $date_fin]);
+         }
+         if($admin != 'all'){
+             $pointages = $pointages->where('personne',$admin);
+         }
+        return Excel::download(new PointageExport($pointages),'pointage.xlsx');
+     }
     public function delete($id)
     {
         $pointage = Pointage::find($id);
@@ -219,5 +236,23 @@ class PointageController extends Controller
             'success' => 'true',
             'msg' => trans('text.element_well_deleted')
         ], 200);
+    }
+
+    public function addPresence($persone_id,$presence_id,$pointage_id)
+    {
+        $pointage =Pointage::find($pointage_id);
+        $presnce_deja=$pointage->detailsPointage->firstWhere('Eleves_id',$persone_id);
+        if ($presnce_deja){
+            $pointage_detail=DetailsPointage::find($presnce_deja->id);
+            $pointage_detail->presence_id = $presence_id;
+            $pointage_detail->save();
+        }else{
+            $detailsPointage = new DetailsPointage();
+            $detailsPointage->Eleves_id = $persone_id;
+            $detailsPointage->pointage_id = $pointage->id;
+            $detailsPointage->presence_id = $presence_id;
+            $detailsPointage->save();
+        }
+        return response()->json($pointage->id, 200);
     }
 }

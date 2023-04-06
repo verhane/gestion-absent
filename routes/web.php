@@ -29,6 +29,8 @@ Route::group([
         Route::post('edit', [PointageController::class, 'edit']);
         Route::get('delete/{id}', [PointageController::class, 'delete']);
         Route::get('exportPdf/{classe}/{admin}/{dateD?}/{dateF?}',[PointageController::class, 'ExportPdf']);
+        Route::get('exportExcel/{classe}/{admin}/{dateD?}/{dateF?}', [PointageController::class, 'exportExcel']);
+        Route::get('addPresence/{persone_id}/{presence_id}/{pointage_id}', [PointageController::class, 'addPresence']);
     });
 
 //rapport Controller
@@ -46,5 +48,6 @@ Route::group([
         Route::post('add', [RapportController::class, 'add']);
         Route::post('edit', [RapportController::class, 'edit']);
         Route::get('delete/{id}', [RapportController::class, 'delete']);
-        Route::get('exportPdf/{classe}/{dateD?}/{dateF?}',[RapportController::class, 'ExportPdf']);
+            Route::get('exportPdf/{classe}/{dateD?}/{dateF?}',[RapportController::class, 'ExportPdf']);
+        Route::get('exportExcel/{classe}/{dateD?}/{dateF?}', [RapportController::class, 'exportExcel']);
     });

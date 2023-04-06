@@ -71,15 +71,18 @@
                     <input type="hidden" name="eleve_id[]" value="{{$eleve->id}}">
                     @php
                         $value_present=$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)?$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)->presence_id:null;
-                        $checked=$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)?'checked':'';
+//                        $checked=$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)?'checked':'';
 
                     @endphp
                     @foreach($presences as $presence)
                         <td>
                             <input
                                 name="present_{{$eleve->id}}"
+                                id="present_{{$presence->id}}_{{$eleve->id}}"
                                 value="{{$presence->id}}"
                                 type="radio"
+                                classe="presence"
+                                onchange="addPresence({{$eleve->id}},{{$presence->id}},{{$pointage->id}})"
                                 @if($value_present==$presence->id) checked @elseif($presence->id=='1') checked  @endif
                             /></td>
                     @endforeach
@@ -90,7 +93,7 @@
             </tbody>
 
         </table>
-
+        presence
     </form>
     <x-buttons.btn-save
         onclick="saveform(this)"
@@ -98,3 +101,25 @@
         @lang('text.enregistrer')
     </x-buttons.btn-save>
 </div>
+
+<script>
+    function addPresence(personne_id,presence_id,pointage_id)
+    {
+        if($('#present_'+presence_id+'_'+personne_id).is(':checked'))
+        {
+            var value_presence = $('#present_'+presence_id+'_'+personne_id).val();
+            $.ajax({
+                type: 'get',
+                url: racine +'pointages/addPresence/' + personne_id+'/'+value_presence+'/'+pointage_id,
+                success: function (data) {
+                    resetInit();
+                },
+                error: function () {
+                    $.alert('error ');
+                }
+            });
+            return false;
+        }
+        return false;
+    }
+</script>
