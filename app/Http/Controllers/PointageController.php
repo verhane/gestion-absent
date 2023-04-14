@@ -25,19 +25,11 @@ class PointageController extends Controller
         return view($this->view.'.index', ['pointages' => $pointages ,'classes'=>$classes,'surveillant'=>$surveillant]);
     }
 
-    public function getDT($classe_id='all' ,$admin='all',$date_debut='all',$date_fin='all' ,$selected = 'all')
+    public function getDT(Request $request)
     {
 
         $pointages = Pointage::query()->with('classes')->with('pointeur');
-        if($classe_id !='all'){
-             $pointages = $pointages->where('classe_id',$classe_id);
-        }
-        if($date_debut !='all' && $date_fin !='all'){
-              $pointages = $pointages->whereBetween('date',[$date_debut, $date_fin]);
-        }
-        if($admin !='all'){
-            $pointages = $pointages->where('personne',$admin);
-        }
+
         return DataTables::of($pointages)
             ->addColumn('actions', function ($pointage) {
                 $deleteLink = $this->link.'/delete/' . $pointage->id;
@@ -57,21 +49,90 @@ class PointageController extends Controller
                     'class' => 'btn-warning btn-sm',
                 ]);
                 return view('actions-btn', ["actions" => $actions])->render();
+            })->filter(function ($pointages) use ($request) {
+
+                if($request->get('date_debut') && $request->get('date_fin')){
+                    $pointages = $pointages->whereBetween('date',[$request->get('date_debut'), $request->get('date_fin')]);
+                }
+                if($request->get('surveillant')){
+                    $pointages = $pointages->where('personne',$request->get('surveillant'));
+                }
+                if($request->get('classe')){
+                    $pointages = $pointages->where('classe_id', $request->get('classe'));
+                }
             })
+
             ->rawColumns(['actions'])
             ->make(true);
     }
-    public function ExportPdf($classe_id='all' ,$admin='all',$date_debut='all',$date_fin='all'){
+
+    public function getDtEleves(  $selected = 'all',$pointage_id){
+          $pointage = Pointage::find($pointage_id);
+//          dd($pointage);
+          $eleves = $pointage->classes->pr_stagieres ;
+        return DataTables::of($eleves)
+            ->addColumn('present',function ($eleve)use($pointage){
+                $value_present=$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)?$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)->presence_id:null;
+                $isChecked='checked';
+                if($value_present){
+                    if($value_present != 1){
+                        $isChecked='';
+                    }
+                }
+                 $html= '<input
+                              name="present_'.$eleve->id.'"
+                              value="1"
+                               type="radio"'.$isChecked.'
+                                  />
+                              <input type="hidden" name="eleve_id[]" value="'.$eleve->id.'">';
+                return   $html;
+            })->addColumn('absent',function ($eleve)use($pointage){
+                $value_present=$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)?$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)->presence_id:null;
+                $isChecked='';
+//                if($value_present){
+                    if($value_present == '2'){
+                        $isChecked='checked';
+                    }
+//                }
+
+                return '<input
+                              name="present_'.$eleve->id.'"
+                              value="2"
+                               type="radio"'.$isChecked.'
+                                  />
+                              <input type="hidden" name="eleve_id[]" value="'.$eleve->id.'">';
+            })->addColumn('absent justifier',function ($eleve)use($pointage){
+                $value_present=$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)?$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)->presence_id:null;
+                $isChecked='';
+//                if($value_present){
+                if($value_present == '3'){
+                    $isChecked='checked';
+                }
+//                }
+
+                return '<input
+                              name="present_'.$eleve->id.'"
+                              value="3"
+                               type="radio"'.$isChecked.'
+                                  />
+                              <input type="hidden" name="eleve_id[]" value="'.$eleve->id.'">';
+            })
+            ->rawColumns(['present','absent' ,'absent justifier'])
+            ->make(true);
+
+    }
+
+
+    public function ExportPdf(Request $request){
         $pointages = Pointage::query()->with('classes');
-        if($classe_id !='all'){
-            $pointages = $pointages->where('classe_id',$classe_id);
-//            $classe =Classe::find($classe_id) ;
+        if($request->get('classe')){
+            $pointages = $pointages->where('classe_id',$request->get('classe'));
         }
-        if($date_debut !='all' && $date_fin !='all'){
-            $pointages = $pointages->whereBetween('date',[$date_debut, $date_fin]);
+        if($request->get('date_debut') && $request->get('date_fin')){
+            $pointages = $pointages->whereBetween('date',[$request->get('date_debut'), $request->get('date_fin')]);
         }
-        if($admin != 'all'){
-            $pointages = $pointages->where('personne',$admin);
+        if($request->get('surveillant')){
+            $pointages = $pointages->where('personne',$request->get('surveillant'));
         }
         $mpdf = new Mpdf() ;
         $mpdf->debug = true ;
@@ -83,7 +144,10 @@ class PointageController extends Controller
         $mpdf->showImageErrors = true;
         $mpdf->AddPage('H', 'A4');
         $mpdf->WriteHTML(view( 'pointages.Export.listPointage', [
-            'pointages' => $pointages
+            'pointages' => $pointages,
+            'classe_id'=>$request->get('classe') ,
+            'date_debut'=>$request->get('date_debut'),
+            'date_fin'=>$request->get('date_fin')
 
         ])->render());
         $mpdf->SetHTMLFooter(
@@ -110,7 +174,7 @@ class PointageController extends Controller
 
         ];
 
-        $modal_title = 'pointeur ' .'<b>'. $pointage->pointeur->name.'</b>';
+        $modal_title = 'pointage des absnets de la classe ' .'<b>'. $pointage->classes->libelle_fr.'</b>';
 
         return view('tabs', [
             'tabs' => $tabs,
@@ -164,7 +228,7 @@ class PointageController extends Controller
              'classe_id' => 'required',
 //             'pointeurName' => 'required',
 //            'date' => 'required',
-             'date'=>'required|after_or_equal:' . date('Y-m-d'),
+             'date'=>'required|before_or_equal:' . date('Y-m-d'),
              'time' => 'required',
 
         ]);
@@ -185,7 +249,8 @@ class PointageController extends Controller
         $pointage->date = request('date');
         $pointage->heures = request('time');
         $pointage->save();
-        return response()->json($pointage->id, 200);
+            $data=array('date'=>$pointage->date ,'time'=> $pointage->heures);
+        return response()->json($data, 200);
     }
 
     public function addPointageDetails(Request $request, $pointage_id)
@@ -215,16 +280,16 @@ class PointageController extends Controller
             }
         }
     }
-     public function exportExcel($classe_id='all' ,$admin='all',$date_debut='all',$date_fin='all'){
+     public function exportExcel(Request $request){
          $pointages = Pointage::query()->with('classes');
-         if($classe_id !='all'){
-             $pointages = $pointages->where('classe_id',$classe_id);
+         if($request->get('classe')){
+             $pointages = $pointages->where('classe_id',$request->get('classe'));
          }
-         if($date_debut !='all' && $date_fin !='all'){
-             $pointages = $pointages->whereBetween('date',[$date_debut, $date_fin]);
+         if($request->get('date_debut') && $request->get('date_fin')){
+             $pointages = $pointages->whereBetween('date',[$request->get('date_debut'),$request->get('date_fin')]);
          }
-         if($admin != 'all'){
-             $pointages = $pointages->where('personne',$admin);
+         if($request->get('surveillant')){
+             $pointages = $pointages->where('personne',$request->get('surveillant'));
          }
         return Excel::download(new PointageExport($pointages),'pointage.xlsx');
      }

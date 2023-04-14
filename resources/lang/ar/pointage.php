@@ -7,5 +7,13 @@ return ['pointage'=>'تسجيل الحضور',
     'libelle'=>'القسم',
     'personne'=>'المشرف',
     'date'=>'التاريخ',
-    'heures'=>'الوقت'
+    'heures'=>'الوقت',
+    'exportPdf'=>'تصدير pdf',
+    'exportExcel'=>'تصدير excel',
+    'ajouter pointages'=>'اضف تسجيل الحضور',
+    'nom'=>'الاسم',
+    'nni'=>'الرقم الوطني',
+    'present'=>'حاضر',
+    'absent'=>'غائب',
+    'absent justifier'=>'غياب مبرر'
 ];

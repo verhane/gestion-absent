@@ -19,16 +19,12 @@ class RapportController extends Controller
         return view('rapports.index',["details"=>$detailPointages , 'classes'=>$classes]);
     }
 
-    public function getDT($classe_id='all' ,$date_debut='all',$date_fin='all' ,$selected = 'all')
+    public function getDT(Request $request,$selected = 'all')
     {
 
         $DetailsPointage = DetailsPointage::query()->with(['pointage','pr_stagaire'])->groupBy('Eleves_id');
-        if($classe_id !='all'){
-            $DetailsPointage = $DetailsPointage->whereIn('pointage_id',Pointage::query()->where('classe_id',$classe_id)->select('id'));
-        }
-        if($date_debut !='all' && $date_fin !='all'){
-            $DetailsPointage = $DetailsPointage->whereIn('pointage_id',Pointage::query()->whereBetween('date',[$date_debut, $date_fin])->select('id'));
-        }
+
+
 
         return DataTables::of($DetailsPointage)
 //            ->addColumn('actions', function ($dpointage) {
@@ -64,17 +60,25 @@ class RapportController extends Controller
                 $count_present=DetailsPointage::query()->where('Eleves_id',$detailsPointage->Eleves_id)
                 ->where('presence_id',3);
                 return $count_present->count();
+            })->filter(function ($DetailsPointage) use ($request) {
+
+                if($request->get('date_debut') && $request->get('date_fin')){
+                    $DetailsPointage = $DetailsPointage->whereIn('pointage_id',Pointage::query()->whereBetween('date',[$request->get('date_debut'),$request->get('date_fin')])->select('id'));
+                }
+                if($request->get('classe')){
+                    $DetailsPointage = $DetailsPointage->whereIn('pointage_id',Pointage::query()->where('classe_id',$request->get('classe'))->select('id'));
+                }
             })
             ->rawColumns(['actions'])
             ->make(true);
     }
-    public function ExportPdf($classe_id='all' , $date_debut='all' , $date_fin='all'){
+    public function ExportPdf(Request $request){
             $detailsPointage = DetailsPointage::query()->with(['pointage','pr_stagaire'])->groupBy('Eleves_id');
-        if($classe_id !='all'){
-            $detailsPointage = $detailsPointage->whereIn('pointage_id',Pointage::query()->where('classe_id',$classe_id)->select('id'));
+        if($request->get('classe')){
+            $detailsPointage = $detailsPointage->whereIn('pointage_id',Pointage::query()->where('classe_id',$request->get('classe'))->select('id'));
         }
-        if($date_debut !='all' && $date_fin !='all'){
-            $detailsPointage = $detailsPointage->whereIn('pointage_id',Pointage::query()->whereBetween('date',[$date_debut, $date_fin])->select('id'));
+        if($request->get('date_debut') && $request->get('date_fin')){
+            $detailsPointage = $detailsPointage->whereIn('pointage_id',Pointage::query()->whereBetween('date',[$request->get('date_debut'), $request->get('date_fin')])->select('id'));
         }
 
         $mpdf = new Mpdf() ;
@@ -88,7 +92,10 @@ class RapportController extends Controller
         $mpdf->AddPage('H', 'A4');
         $mpdf->autoScriptToLang=true;
         $mpdf->WriteHTML(view( 'rapports.export.listPdf', [
-            'detailsPointage' => $detailsPointage
+            'detailsPointage' => $detailsPointage,
+            'classe'=>$request->get('classe'),
+            'date_debut'=>$request->get('date_debut'),
+            'date_fin'=>$request->get('date_fin')
 
         ])->render());
         $mpdf->SetHTMLFooter(
@@ -104,13 +111,13 @@ class RapportController extends Controller
         $mpdf->Output();
 
     }
-    public function exportExcel($classe_id='all' ,$date_debut='all' ,$date_fin='all'){
+    public function exportExcel(Request $request){
         $detailsPointage = DetailsPointage::query()->with(['pointage','pr_stagaire'])->groupBy('Eleves_id');
-        if($classe_id !='all'){
-            $detailsPointage = $detailsPointage->whereIn('pointage_id',Pointage::query()->where('classe_id',$classe_id)->select('id'));
+        if($request->get('classe')){
+            $detailsPointage = $detailsPointage->whereIn('pointage_id',Pointage::query()->where('classe_id',$request->get('classe'))->select('id'));
         }
-        if($date_debut !='all' && $date_fin !='all'){
-            $detailsPointage = $detailsPointage->whereIn('pointage_id',Pointage::query()->whereBetween('date',[$date_debut, $date_fin])->select('id'));
+        if($request->get('date_debut') && $request->get('date_fin')){
+            $detailsPointage = $detailsPointage->whereIn('pointage_id',Pointage::query()->whereBetween('date',[$request->get('date_debut'),  $request->get('date_fin')])->select('id'));
         }
         return Excel::download(new RapportExport($detailsPointage),'rapport.xlsx');
     }

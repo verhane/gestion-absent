@@ -168,16 +168,16 @@
         },
         {
             "name": "dcs/core",
-            "version": "v1.1.43",
+            "version": "v1.1.48",
             "source": {
                 "type": "git",
                 "url": "git@gitlab.com:package-dcs/core.git",
-                "reference": "7ea2ed85e39f997e15f1d3763063772727996333"
+                "reference": "8ad291a45590ff7d3798054d92afc88370302953"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/package-dcs%2Fcore/repository/archive.zip?sha=7ea2ed85e39f997e15f1d3763063772727996333",
-                "reference": "7ea2ed85e39f997e15f1d3763063772727996333",
+                "url": "https://gitlab.com/api/v4/projects/package-dcs%2Fcore/repository/archive.zip?sha=8ad291a45590ff7d3798054d92afc88370302953",
+                "reference": "8ad291a45590ff7d3798054d92afc88370302953",
                 "shasum": ""
             },
             "type": "library",
@@ -209,23 +209,23 @@
             ],
             "description": "This is a core of the projects: components",
             "support": {
-                "source": "https://gitlab.com/package-dcs/core/-/tree/v1.1.43",
+                "source": "https://gitlab.com/package-dcs/core/-/tree/v1.1.48",
                 "issues": "https://gitlab.com/package-dcs/core/-/issues"
             },
-            "time": "2023-02-15T20:45:44+00:00"
+            "time": "2023-03-23T11:12:46+00:00"
         },
         {
             "name": "dcs/ged",
-            "version": "v1.0.49",
+            "version": "v1.0.50",
             "source": {
                 "type": "git",
                 "url": "git@gitlab.com:package-dcs/ged.git",
-                "reference": "afc89a85a4216b9bc48f50207bbcc7c01d32817d"
+                "reference": "449c96d4c5d18734ad739b8e77d2a872132b205f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/package-dcs%2Fged/repository/archive.zip?sha=afc89a85a4216b9bc48f50207bbcc7c01d32817d",
-                "reference": "afc89a85a4216b9bc48f50207bbcc7c01d32817d",
+                "url": "https://gitlab.com/api/v4/projects/package-dcs%2Fged/repository/archive.zip?sha=449c96d4c5d18734ad739b8e77d2a872132b205f",
+                "reference": "449c96d4c5d18734ad739b8e77d2a872132b205f",
                 "shasum": ""
             },
             "type": "library",
@@ -263,23 +263,23 @@
             "description": "Module destiné a la gestion electronique des documents ",
             "homepage": "https://dcs-sarl.com",
             "support": {
-                "source": "https://gitlab.com/package-dcs/ged/-/tree/v1.0.49",
+                "source": "https://gitlab.com/package-dcs/ged/-/tree/v1.0.50",
                 "issues": "https://gitlab.com/package-dcs/ged/-/issues"
             },
-            "time": "2023-02-02T14:19:44+00:00"
+            "time": "2023-04-08T14:29:08+00:00"
         },
         {
             "name": "dcs/ref",
-            "version": "v1.0.28",
+            "version": "v1.0.31",
             "source": {
                 "type": "git",
                 "url": "git@gitlab.com:package-dcs/ref.git",
-                "reference": "d054d8cac55a05c00b856c264e97a3ce344e151f"
+                "reference": "17100b2700c527523d4fd0c7929d9452686cfbe0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/package-dcs%2Fref/repository/archive.zip?sha=d054d8cac55a05c00b856c264e97a3ce344e151f",
-                "reference": "d054d8cac55a05c00b856c264e97a3ce344e151f",
+                "url": "https://gitlab.com/api/v4/projects/package-dcs%2Fref/repository/archive.zip?sha=17100b2700c527523d4fd0c7929d9452686cfbe0",
+                "reference": "17100b2700c527523d4fd0c7929d9452686cfbe0",
                 "shasum": ""
             },
             "type": "library",
@@ -307,10 +307,10 @@
             "description": "Module destiné a la gestion des referentiels  ",
             "homepage": "https://dcs-sarl.com",
             "support": {
-                "source": "https://gitlab.com/package-dcs/ref/-/tree/v1.0.28",
+                "source": "https://gitlab.com/package-dcs/ref/-/tree/v1.0.31",
                 "issues": "https://gitlab.com/package-dcs/ref/-/issues"
             },
-            "time": "2023-02-11T14:05:50+00:00"
+            "time": "2023-02-24T02:34:43+00:00"
         },
         {
             "name": "dflydev/dot-access-data",

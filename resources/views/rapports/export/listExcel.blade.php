@@ -13,7 +13,7 @@
 <table class="table table-bordered"   id="pointage">
     <thead>
     <tr>
-        <th scope="col">#</th>
+{{--        <th scope="col">#</th>--}}
         <th scope="col">nom</th>
         <th scope="col">nni</th>
         <th scope="col">date</th>
@@ -27,7 +27,7 @@
     <tbody>
     @foreach($detailspointages->get() as $dpointage)
         <tr>
-            <td>{{$dpointage->id}}</td>
+{{--            <td>{{$dpointage->id}}</td>--}}
             <td>{{$dpointage->pr_stagaire->nom}}</td>
             <td>{{$dpointage->pr_stagaire->nni}}</td>
             <td>{{$dpointage->pointage->date}}</td>

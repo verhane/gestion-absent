@@ -20,7 +20,8 @@ Route::group([
 ],
     function () {
         Route::get('', [PointageController::class, 'index']);
-        Route::get('getDT/{classe}/{admin}/{dateD?}/{dateF?}/{selected?}', [PointageController::class, 'getDT']);
+        Route::get('getDT/{selected?}', [PointageController::class, 'getDT']);
+        Route::get('getDTEleves/{selected?}/{pointage_id}',[PointageController::class,'getDtEleves']);
         Route::get('get/{id}', [PointageController::class, 'get']);
         Route::get('getTab/{id}/{tab}', [PointageController::class, 'getTab']);
         Route::get('add', [PointageController::class, 'formAdd']);
@@ -28,8 +29,8 @@ Route::group([
         Route::post('addPointageDetails/{eleves}', [PointageController::class, 'addPointageDetails']);
         Route::post('edit', [PointageController::class, 'edit']);
         Route::get('delete/{id}', [PointageController::class, 'delete']);
-        Route::get('exportPdf/{classe}/{admin}/{dateD?}/{dateF?}',[PointageController::class, 'ExportPdf']);
-        Route::get('exportExcel/{classe}/{admin}/{dateD?}/{dateF?}', [PointageController::class, 'exportExcel']);
+        Route::post('exportPdf',[PointageController::class, 'ExportPdf']);
+        Route::post('exportExcel', [PointageController::class, 'exportExcel']);
         Route::get('addPresence/{persone_id}/{presence_id}/{pointage_id}', [PointageController::class, 'addPresence']);
     });
 
@@ -41,13 +42,13 @@ Route::group([
 ],
     function () {
         Route::get('', [RapportController::class, 'index']);
-        Route::get('getDT/{classe}/{dateD?}/{dateF?}/{selected?}', [RapportController::class, 'getDT']);
+        Route::get('getDT/{selected?}', [RapportController::class, 'getDT']);
         Route::get('get/{id}', [RapportController::class, 'get']);
         Route::get('getTab/{id}/{tab}', [RapportController::class, 'getTab']);
         Route::get('add', [RapportController::class, 'formAdd']);
         Route::post('add', [RapportController::class, 'add']);
         Route::post('edit', [RapportController::class, 'edit']);
         Route::get('delete/{id}', [RapportController::class, 'delete']);
-            Route::get('exportPdf/{classe}/{dateD?}/{dateF?}',[RapportController::class, 'ExportPdf']);
-        Route::get('exportExcel/{classe}/{dateD?}/{dateF?}', [RapportController::class, 'exportExcel']);
+        Route::post('exportPdf',[RapportController::class, 'ExportPdf']);
+        Route::post('exportExcel', [RapportController::class, 'exportExcel']);
     });

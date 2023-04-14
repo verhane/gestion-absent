@@ -21,14 +21,29 @@
         background-color: #04AA6D;
         color: white;
     }
+    h2 ,h4{
+        font-weight: 300    ;
+        text-align: center;
+    }
 </style>
+
 @include('globales.entete')
 
+<h2>liste de rapprots</h2>
+@if($classe != '')
+    @php
+        $classes= \App\Models\Classe::find($classe);
+    @endphp
+    <h4>Classe:{{$classes->libelle_fr}}</h4>
 
+@endif
+@if($date_debut !='' && $date_fin !='')
+    <h4>periode du {{$date_debut}} ou {{$date_fin}} </h4>
+@endif
 <table class="table table-bordered"   id="pointage">
     <thead>
     <tr>
-        <th scope="col">#</th>
+
         <th scope="col">nom</th>
         <th scope="col">nni</th>
         <th scope="col">date</th>
@@ -42,8 +57,8 @@
     <tbody>
     @foreach($detailsPointage->get() as $dpointage)
         <tr>
-            <td>{{$dpointage->id}}</td>
-            <td>{{$dpointage->pr_stagaire->nom}}</td>
+{{--            <td>{{$dpointage->id}}</td>--}}
+            <td>{{$dpointage->pr_stagaire->nom}} {{$dpointage->pr_stagaire->prenom}}</td>
             <td>{{$dpointage->pr_stagaire->nni}}</td>
             <td>{{$dpointage->pointage->date}}</td>
             @php
