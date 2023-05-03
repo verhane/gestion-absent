@@ -61,8 +61,9 @@ Route::group([
     'roles' => [1]
 ],
     function () {
-        Route::get('', [SuiviController::class, 'index']);
+            Route::get('', [SuiviController::class, 'index']);
             Route::get('getEleve/{eleve}', [SuiviController::class, 'getEleve']);
             Route::get('getDetEleve/{id}/{date_debut?}/{date_fin?}', [SuiviController::class, 'getDetEleve']);
+            Route::post('exportPdf',[SuiviController::class, 'ExportPdf']);
 
     });
