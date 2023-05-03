@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SuiviController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
@@ -51,4 +52,17 @@ Route::group([
         Route::get('delete/{id}', [RapportController::class, 'delete']);
         Route::post('exportPdf',[RapportController::class, 'ExportPdf']);
         Route::post('exportExcel', [RapportController::class, 'exportExcel']);
+    });
+
+//Suivis Controller
+Route::group([
+    'prefix' => 'suivis',
+    'middleware' => ['web', 'auth', 'roles'],
+    'roles' => [1]
+],
+    function () {
+        Route::get('', [SuiviController::class, 'index']);
+            Route::get('getEleve/{eleve}', [SuiviController::class, 'getEleve']);
+            Route::get('getDetEleve/{id}/{date_debut?}/{date_fin?}', [SuiviController::class, 'getDetEleve']);
+
     });

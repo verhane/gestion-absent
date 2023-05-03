@@ -1,6 +1,6 @@
 <x-modal.modal-header-body>
     <x-slot name="title">
-        add new pointage
+        @lang('pointage.ajouter pointages')
     </x-slot>
     <div id="formAddFamille">
         <form action="{{ url('pointages/add') }}" method="POST">

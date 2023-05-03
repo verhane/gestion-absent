@@ -18,7 +18,7 @@
 {{--       <button class="btn pull-right" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"--}}
 {{--               style="background-color: #28d094;color: white;">--}}
            <a href="#" class="pull-right" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-               <i class="fas fa-edit fa-2x" style="color: #F5F5F5;"></i>
+               <i class="fas fa-edit fa-2x" style="color: #1e293b;"></i>
 {{--       </button>--}}
             </a>
         </div>

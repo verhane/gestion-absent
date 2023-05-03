@@ -46,7 +46,7 @@
 
         <th scope="col">nom</th>
         <th scope="col">nni</th>
-        <th scope="col">date</th>
+
         <th>nombre present</th>
         <th>nombre absent</th>
         <th>nombre absent justifier</th>
@@ -60,7 +60,7 @@
 {{--            <td>{{$dpointage->id}}</td>--}}
             <td>{{$dpointage->pr_stagaire->nom}} {{$dpointage->pr_stagaire->prenom}}</td>
             <td>{{$dpointage->pr_stagaire->nni}}</td>
-            <td>{{$dpointage->pointage->date}}</td>
+{{--            <td>{{$dpointage->pointage->date}}</td>--}}
             @php
                  $count_present=\App\Models\DetailsPointage::query()->where('Eleves_id',$dpointage->Eleves_id)
                     ->where('presence_id',1)->count();

@@ -7,7 +7,7 @@ return ['rapport'=>'Rapport',
     'nom'=>'Nom',
     'prenom'=>'Prenom',
     'date'=>'Date',
-    'nombre present'=>'nombre present',
-    'nombre absent'=>'nombre absent',
-    'nombre absent justifie'=>'nombre absent justifie'
+    'nombre present'=>'nbre present',
+    'nombre absent'=>'nbre absent',
+    'nombre absent justifie'=>'nbre absent justifie'
 ];

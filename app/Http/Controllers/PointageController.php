@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Exports\PointageExport;
+use App\Http\Requests\editPointageRequest;
+use App\Http\Requests\PointageRequest;
 use App\Models\ClassesPrStagiaire;
 use App\Models\DetailsPointage;
 use App\Models\RefPresent;
@@ -68,7 +70,7 @@ class PointageController extends Controller
 
     public function getDtEleves(  $selected = 'all',$pointage_id){
           $pointage = Pointage::find($pointage_id);
-//          dd($pointage);
+
           $eleves = $pointage->classes->pr_stagieres ;
         return DataTables::of($eleves)
             ->addColumn('present',function ($eleve)use($pointage){
@@ -221,28 +223,42 @@ class PointageController extends Controller
         return view('pointages.add', ['classes' => $classes]);
     }
 
-    public function add(Request $request)
+    public function add(PointageRequest $request)
     {
+          $request->validated();
 
-        $this->validate($request, [
-             'classe_id' => 'required',
-//             'pointeurName' => 'required',
-//            'date' => 'required',
-             'date'=>'required|before_or_equal:' . date('Y-m-d'),
-             'time' => 'required',
+//        $this->validate($request, [
+//             'classe_id' => 'required',
+////             'pointeurName' => 'required',
+////            'date' => 'required',
+//             'date'=>'required|before_or_equal:' . date('Y-m-d'),
+//             'time' => 'required',
+//
+//        ]);
+        $pointages = Pointage::query()->where('classe_id' ,request('classe_id'))
+            ->where('date',request('date'))
+            ->where('heures',request('time'))->exists();
 
-        ]);
-        $pointage = new Pointage();
-        $pointage->classe_id = request('classe_id');
-        $pointage->personne = auth()->id();
-        $pointage->date = request('date');
-        $pointage->heures = request('time');
-        $pointage->save();
-        return response()->json($pointage->id, 200);
+        if($pointages){
+            dd($pointages);
+        }else{
+            $pointage = new Pointage();
+            $pointage->classe_id = request('classe_id');
+            $pointage->personne = auth()->id();
+            $pointage->date = request('date');
+            $pointage->heures = request('time');
+            $pointage->save();
+            return response()->json($pointage->id, 200);
+        }
+
+//            }
+//        }
+
     }
 
-    public function edit(Request $request)
+    public function edit(editPointageRequest $request)
     {
+         $request->validated();
         $pointage = Pointage::find(request('idPointage'));
 //        $pointage->classe_id = request('classe_id');
         $pointage->personne = auth()->id();

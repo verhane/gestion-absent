@@ -32,17 +32,17 @@
                            @lang('rapport.date debut')
                         </x-slot>
                        <div class="col">
-                       <x-forms.input type="date" name="date_debut" id="date_debut"/>
+                       <x-forms.input type="date" onchange="refreshDatatable()" name="date_debut" id="date_debut"/>
                        </div>
                       </x-filtres.element>
 
-                      <x-filtres.element class="col-md-4 mb-1">
-            <x-slot name="label">
-               @lang('rapport.date fin')
-            </x-slot>
-            <div class="col">
-                <x-forms.input type="date" onchange="refreshDatatable()" name="date_fin" id="date_fin"/>
-            </div>
+                        <x-filtres.element class="col-md-4 mb-1">
+                          <x-slot name="label">
+                             @lang('rapport.date fin')
+                             </x-slot>
+                       <div class="col">
+                           <x-forms.input type="date" onchange="refreshDatatable()" name="date_fin" id="date_fin"/>
+                       </div>
         </x-filtres.element>
     </x-filtres.container>
 

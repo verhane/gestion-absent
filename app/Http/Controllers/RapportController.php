@@ -68,6 +68,12 @@ class RapportController extends Controller
                 if($request->get('classe')){
                     $DetailsPointage = $DetailsPointage->whereIn('pointage_id',Pointage::query()->where('classe_id',$request->get('classe'))->select('id'));
                 }
+                if($request->get('date_debut')){
+                    $DetailsPointage = $DetailsPointage->whereIn('pointage_id',Pointage::query()->where('date','>=',$request->get('date_debut'))->select('id'));
+                }
+                if($request->get('date_fin')){
+                    $DetailsPointage = $DetailsPointage->whereIn('pointage_id',Pointage::query()->where('date','<=',$request->get('date_fin'))->select('id'));
+                }
             })
             ->rawColumns(['actions'])
             ->make(true);

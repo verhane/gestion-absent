@@ -39,7 +39,7 @@
 
 @endif
     @if($date_debut !='' && $date_fin !='')
-        <h4>periode du {{$date_debut}} ou {{$date_fin}} ]</h4>
+        <h4>periode du {{$date_debut}} ou {{$date_fin}} s</h4>
     @endif
 </div>
 <table class="table table-bordered"   id="pointage">
