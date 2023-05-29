@@ -1,8 +1,8 @@
 <?php
 return ['pointage'=>'تسجيل الحضور',
     'classe'=>'القسم' ,
-    'date debut'=>'تاريخ البداية' ,
-    'date fin'=>'تاريخ النهاية' ,
+    'date debut'=>'من التاريخ' ,
+    'date fin'=>' الي' ,
     'surveillant'=>'المشرف',
     'libelle'=>'القسم',
     'personne'=>'المشرف',
@@ -15,5 +15,12 @@ return ['pointage'=>'تسجيل الحضور',
     'nni'=>'الرقم الوطني',
     'present'=>'حاضر',
     'absent'=>'غائب',
-    'absent justifier'=>'غياب مبرر'
+    'absent justifier'=>'غياب مبرر',
+    'valide'=>'قم بالتاكيد',
+    'present'=>'حاضر',
+    'absent'=>'عائب',
+    'absent_justifie'=>'غياب مبرر' ,
+    'valide'=>'قم بالتاكيد',
+    'presence'=>'الحضور',
+    'pointage_exists'=>'تسجيل الحضور موجود'
 ];

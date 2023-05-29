@@ -8,7 +8,6 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Dcs\Ref\Models\RefCommune;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 
 /**
@@ -38,15 +37,25 @@ class PrStagiaire extends Eloquent
 	use \Illuminate\Database\Eloquent\SoftDeletes;
 
 	protected $fillable = [
-		'nom',
-		'prenom',
 		'nni',
 		// 'date_naissance',
 		'lieu_naissance',
 		'sexe',
 		'tel',
 		'email',
-		'commentaire'
+		'commentaire',
+		'nom',
+		'nom_ar',
+		'prenom',
+		'prenom_ar',
+		'nom_famille',
+		'nom_famille_ar',
+		'new_lieu_naissance',
+		'new_lieu_naissance_ar',
+		'sexe',
+		'old_info',
+		'nni_checked',
+		'nni_check_date'
 	];
 
 	// public function pr_echantillons()
@@ -87,9 +96,6 @@ class PrStagiaire extends Eloquent
 	{
 		return $this->hasMany(ClassesPrStagiaire::class, 'pr_stagiaire_id');
 	}
-    public function detailPointag(){
-        return $this->hasMany(DetailsPointage::class,'Eleves_id');
-    }
 
     public function age()
     {
@@ -129,12 +135,31 @@ class PrStagiaire extends Eloquent
 			return null;
 	}
 
-	public function getLieuNaissanceAttribute($value)
+//	public function getLieuNaissanceAttribute($value)
+//	{
+//		if(is_numeric($value) && \App\Models\ref_communes::where('id', $value)->exists())
+//			return \App\Models\ref_communes::find($value)->libelle;
+//		else
+//			return $value;
+//	}
+
+	public function getFullNameAttribute()
 	{
-		if(is_numeric($value) && RefCommune::find($value))
-			return RefCommune::find($value)->libelle;
-		else
-			return $value;
+		return $this->prenom.' '.$this->nom.' '.$this->nom_famille;
+	}
+
+	// public function getDlnAttribute()
+	// {
+	// 	$date_naissance = ($stagiaire->date_naissance) ? \Carbon\Carbon::parse($stagiaire->date_naissance)->format('d-m-Y') : "";
+	// 	if($this->nni_checked)
+	// 	$lieu_naissance = ($stagiaire->lieu_naissance) ? \Carbon\Carbon::parse($stagiaire->lieu_naissance)->format('d-m-Y') : "";
+	// 	$lieu_naissance = ($stagiaire->lieu_naissance) ? \Carbon\Carbon::parse($stagiaire->lieu_naissance)->format('d-m-Y') : "";
+	// 	return trans('eleve.ne').' '.$date_naissance.' '.trans('eleve.a').' '.;
+	// }
+
+	public function details_pointages()
+	{
+		return $this->hasMany(DetailsPointage::class);
 	}
 
 }

@@ -1,8 +1,8 @@
 <?php
 return ['pointage'=>'Pointages',
     'classe'=>'Classe' ,
-    'date debut'=>'Date debut' ,
-    'date fin'=>'Date fin' ,
+    'date debut'=>'du' ,
+    'date fin'=>'au' ,
     'surveillant'=>'Surveillant',
     'libelle'=>'Classe',
     'personne'=>'Pointeur',
@@ -13,7 +13,10 @@ return ['pointage'=>'Pointages',
     'ajouter pointages'=>'ajouter pointage',
     'nom'=>'nom',
     'nni'=>'nni',
-    'present'=>'present',
-    'absent'=>'absent',
-    'absent justifier'=>'absent justifier'
+    'present'=>'presént',
+    'absent'=>'Absent',
+    'absent_justifie'=>'Absent justifié' ,
+    'valide'=>'validé',
+    'presence'=>'presence',
+    'pointage_exists'=>'pointage exist'
 ];

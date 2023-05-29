@@ -1,8 +1,8 @@
 <?php
 return ['rapport'=>'تقرير',
     'classe'=>'القسم' ,
-    'date debut'=>'بداية التاريخ' ,
-    'date fin'=>'نهاية التاريخ' ,
+    'date debut'=>'من التاريخ' ,
+    'date fin'=>'الي' ,
     'matircule'=>'الرقم الخاص',
     'nom'=>'الاسم',
     'prenom'=>'اسم الاب',

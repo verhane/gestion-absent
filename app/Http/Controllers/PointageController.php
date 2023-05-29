@@ -8,6 +8,7 @@ use App\Http\Requests\PointageRequest;
 use App\Models\ClassesPrStagiaire;
 use App\Models\DetailsPointage;
 use App\Models\RefPresent;
+use Carbon\Carbon;
 use Dcs\Admin\Models\SysUser;
 use Illuminate\Http\Request;
 use  App\Models\Pointage ;
@@ -17,22 +18,42 @@ use Yajra\DataTables\Facades\DataTables;
 use Mpdf\Mpdf;
 class PointageController extends Controller
 {
-   private $view="pointages";
-   private $link = "pointages";
+    private $view="pointages";
+    private $link = "pointages";
+
     public function index()
     {
-        $pointages = Pointage::all();
         $classes = Classe::all();
-        $surveillant = SysUser::query()->whereIn('id',Pointage::query()->select('personne'))->get();
-        return view($this->view.'.index', ['pointages' => $pointages ,'classes'=>$classes,'surveillant'=>$surveillant]);
+        $surveillants = SysUser::query()->whereIn('id', Pointage::query()->select('sys_user_id'))->get();
+        return view($this->view.'.index', ['classes'=>$classes, 'surveillants'=>$surveillants]);
     }
 
     public function getDT(Request $request)
     {
+        $pointages = Pointage::query()->orderBy('created_at', 'desc')->with('classe', 'pointeur');
 
-        $pointages = Pointage::query()->with('classes')->with('pointeur');
+        if ($request->get('date_debut')){
+            $pointages = $pointages->where('date' ,'>=',$request->get('date_debut'));
+        }
+        if ($request->get('date_fin')){
+            $pointages = $pointages->where('date' ,'<=',$request->get('date_fin'));
+        }
+        if($request->get('surveillant')){
+            $pointages = $pointages->where('sys_user_id',$request->get('surveillant'));
+        }
+        if($request->get('classe')){
+            $pointages = $pointages->where('classe_id', $request->get('classe'));
+        }
 
         return DataTables::of($pointages)
+            ->editColumn('date',function ($pointage){
+                $formattedDate = Carbon::parse($pointage->date)->format('d/m/Y');
+                return $formattedDate ;
+            })
+            ->editColumn('heure',function ($pointage){
+                $formattedDate = Carbon::parse($pointage->heure)->format('H:i');
+                return $formattedDate ;
+            })
             ->addColumn('actions', function ($pointage) {
                 $deleteLink = $this->link.'/delete/' . $pointage->id;
                 $actions = collect();
@@ -43,6 +64,7 @@ class PointageController extends Controller
                     'class' => 'btn-dark btn-sm',
                     'title' => trans('text.visualiser')
                 ]);
+                if (auth()->user()->hasAccess(30,5))
                 $actions->push([
                     'icon' => 'delete',
                     'title' => 'Delete',
@@ -51,82 +73,48 @@ class PointageController extends Controller
                     'class' => 'btn-warning btn-sm',
                 ]);
                 return view('actions-btn', ["actions" => $actions])->render();
-            })->filter(function ($pointages) use ($request) {
-
-                if($request->get('date_debut') && $request->get('date_fin')){
-                    $pointages = $pointages->whereBetween('date',[$request->get('date_debut'), $request->get('date_fin')]);
-                }
-                if($request->get('surveillant')){
-                    $pointages = $pointages->where('personne',$request->get('surveillant'));
-                }
-                if($request->get('classe')){
-                    $pointages = $pointages->where('classe_id', $request->get('classe'));
-                }
             })
-
             ->rawColumns(['actions'])
             ->make(true);
     }
 
-    public function getDtEleves(  $selected = 'all',$pointage_id){
-          $pointage = Pointage::find($pointage_id);
+    public function getElevesDT($selected = 'all', $pointage_id)
+    {
+        $pointage = Pointage::find($pointage_id);
 
-          $eleves = $pointage->classes->pr_stagieres ;
-        return DataTables::of($eleves)
-            ->addColumn('present',function ($eleve)use($pointage){
-                $value_present=$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)?$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)->presence_id:null;
-                $isChecked='checked';
-                if($value_present){
-                    if($value_present != 1){
-                        $isChecked='';
-                    }
+        return DataTables::of($pointage->details_pointages()->with('pr_stagiaire'))
+            ->addColumn('presence',function ($detail){
+                $isDisabled = '';
+                if($detail->pointage->ref_etats_pointage_id == 2)
+                    $isDisabled='disabled';
+                if (!auth()->user()->hasAccess(30,2)){
+                    $isDisabled='disabled';
                 }
-                 $html= '<input
-                              name="present_'.$eleve->id.'"
-                              value="1"
-                               type="radio"'.$isChecked.'
-                                  />
-                              <input type="hidden" name="eleve_id[]" value="'.$eleve->id.'">';
-                return   $html;
-            })->addColumn('absent',function ($eleve)use($pointage){
-                $value_present=$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)?$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)->presence_id:null;
-                $isChecked='';
-//                if($value_present){
-                    if($value_present == '2'){
-                        $isChecked='checked';
-                    }
-//                }
-
-                return '<input
-                              name="present_'.$eleve->id.'"
-                              value="2"
-                               type="radio"'.$isChecked.'
-                                  />
-                              <input type="hidden" name="eleve_id[]" value="'.$eleve->id.'">';
-            })->addColumn('absent justifier',function ($eleve)use($pointage){
-                $value_present=$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)?$pointage->detailsPointage->firstWhere('Eleves_id',$eleve->id)->presence_id:null;
-                $isChecked='';
-//                if($value_present){
-                if($value_present == '3'){
-                    $isChecked='checked';
-                }
-//                }
-
-                return '<input
-                              name="present_'.$eleve->id.'"
-                              value="3"
-                               type="radio"'.$isChecked.'
-                                  />
-                              <input type="hidden" name="eleve_id[]" value="'.$eleve->id.'">';
+                $html = '<input type="hidden" name="detail_presences[]" value="'.$detail->id.'">';
+                $html .= '<input name="presence_'.$detail->id.'" value="1" type="radio"'.($detail->ref_etats_presence_id == 1 ? 'checked' : '').' '.$isDisabled.'/> <span class="mr-1">'. trans("pointage.present") .'</span>';
+                $html .= '<input name="presence_'.$detail->id.'" value="2" type="radio"'.($detail->ref_etats_presence_id == 2 ? 'checked' : '').' '.$isDisabled.'/> <span class="mr-1">'.trans("pointage.absent").'</span>';
+                $html .= '<input name="presence_'.$detail->id.'" value="3" type="radio"'.($detail->ref_etats_presence_id == 3 ? 'checked' : '').' '.$isDisabled.'/> <span class="mr-1"> '.trans("pointage.absent_justifie").' </span>';
+                return $html;
             })
-            ->rawColumns(['present','absent' ,'absent justifier'])
+            ->addColumn('full_name', function ($detail) {
+                if($detail->pr_stagiaire->nni_checked && file_exists('anrpts/photos/'.$detail->pr_stagiaire->nni.'.jpg'))
+                        $img_link = 'anrpts/photos/'.$detail->pr_stagiaire->nni.'.jpg';
+                else
+                        $img_link = 'img/avatar_2x.png';
+                $img = '<img style="width:35px" class="img img-thumbnail border-light" src="'. asset($img_link) .'"/>';
+                $full_name = $img.' '.$detail->pr_stagiaire->prenom . " " . $detail->pr_stagiaire->nom;
+                return $full_name;
+            })
+//            ->filterColumn('full_name', function ($query, $keyword) {
+//                $query->whereRaw("prenom LIKE ?", ["%$keyword%"])->orWhereRaw("nom LIKE ?", ["%$keyword%"]);
+//            })
+            ->rawColumns(['full_name','presence'])
             ->make(true);
 
     }
 
-
     public function ExportPdf(Request $request){
-        $pointages = Pointage::query()->with('classes');
+        $pointages = Pointage::query()->with('classe');
         if($request->get('classe')){
             $pointages = $pointages->where('classe_id',$request->get('classe'));
         }
@@ -134,7 +122,7 @@ class PointageController extends Controller
             $pointages = $pointages->whereBetween('date',[$request->get('date_debut'), $request->get('date_fin')]);
         }
         if($request->get('surveillant')){
-            $pointages = $pointages->where('personne',$request->get('surveillant'));
+            $pointages = $pointages->where('sys_user_id',$request->get('surveillant'));
         }
         $mpdf = new Mpdf() ;
         $mpdf->debug = true ;
@@ -172,11 +160,9 @@ class PointageController extends Controller
         $tablink = $this->link.'/getTab/' . $id;
         $tabs = [
             '<i class="fa fa-info-circle"></i> info' => $tablink . '/1',
-//            '<i class="fa fa-user"></i> details ' => $tablink . '/2',
-
         ];
 
-        $modal_title = 'pointage des absnets de la classe ' .'<b>'. $pointage->classes->libelle_fr.'</b>';
+        $modal_title = 'pointage des absnets de la classe ' .'<b>'. $pointage->classe->libelle_fr.'</b>';
 
         return view('tabs', [
             'tabs' => $tabs,
@@ -194,23 +180,20 @@ class PointageController extends Controller
                 $parametres = [
                     'pointage' => $pointage,
                     'classes' => Classe::all(),
-                    'eleves' => $pointage->classes->pr_stagieres,
+                    'eleves' => $pointage->classe->pr_stagieres,
                     'presences'=>RefPresent::all(),
                 ];
                 break;
             case '2':
                 $parametres = [
                     'pointage' => $pointage,
-                    'eleves' => $pointage->classes->pr_stagieres,
+                    'eleves' => $pointage->classe->pr_stagieres,
                     'presences'=>RefPresent::all(),
-
-
                 ];
                 break;
             default :
                 $parametres = [
                     'pointage' => $pointage,
-
                 ];
                 break;
         }
@@ -225,79 +208,63 @@ class PointageController extends Controller
 
     public function add(PointageRequest $request)
     {
-          $request->validated();
-
-//        $this->validate($request, [
-//             'classe_id' => 'required',
-////             'pointeurName' => 'required',
-////            'date' => 'required',
-//             'date'=>'required|before_or_equal:' . date('Y-m-d'),
-//             'time' => 'required',
-//
-//        ]);
-        $pointages = Pointage::query()->where('classe_id' ,request('classe_id'))
+        $pointages_exists = Pointage::query()->where('classe_id' ,request('classe_id'))
             ->where('date',request('date'))
-            ->where('heures',request('time'))->exists();
-
-        if($pointages){
-            dd($pointages);
+            ->where('heure',request('time'))->exists();
+        if($pointages_exists){
+            return response()->json(['time'=>[trans('pointage.pointage_exists')]],422);
         }else{
+            $pointages_exist = Pointage::query()->where('classe_id' ,request('classe_id'))->exists();
+            if($pointages_exist){
+                $pointage = Pointage::query()->where('classe_id' ,request('classe_id'))->latest()->limit(1)->get();
+                $pointage_valide = Pointage::findOrFail($pointage[0]->id) ;
+                $pointage_valide->ref_etats_pointage_id = 2;
+                $pointage_valide->save();
+            }
+
             $pointage = new Pointage();
             $pointage->classe_id = request('classe_id');
-            $pointage->personne = auth()->id();
+            $pointage->sys_user_id = auth()->id();
             $pointage->date = request('date');
-            $pointage->heures = request('time');
+            $pointage->heure = request('time');
+            $pointage->ref_etats_pointage_id = 1 ;
             $pointage->save();
+//            dd($pointage->classe->pr_stagiaires);
+            foreach ($pointage->classe->pr_stagiaires as $eleve) {
+                $detailsPointage = new DetailsPointage();
+                $detailsPointage->pr_stagiaire_id = $eleve->id;
+                $detailsPointage->pointage_id = $pointage->id;
+                $detailsPointage->ref_etats_presence_id = 1; // present
+                $detailsPointage->save();
+            }
+
             return response()->json($pointage->id, 200);
         }
-
-//            }
-//        }
-
     }
 
     public function edit(editPointageRequest $request)
     {
-         $request->validated();
         $pointage = Pointage::find(request('idPointage'));
-//        $pointage->classe_id = request('classe_id');
-        $pointage->personne = auth()->id();
+        $pointage->sys_user_id = auth()->id();
         $pointage->date = request('date');
-        $pointage->heures = request('time');
+        $pointage->heure = request('time');
         $pointage->save();
-            $data=array('date'=>$pointage->date ,'time'=> $pointage->heures);
+        $data=array('date'=>$pointage->date ,'time'=> $pointage->heure);
         return response()->json($data, 200);
     }
 
     public function addPointageDetails(Request $request, $pointage_id)
     {
-        $pointage =Pointage::find($pointage_id);
-
-        foreach (request('eleve_id') as $key => $e) {
-            $eleve_id=$request->input('eleve_id')[$key];
-            $presence_id = $request->input('present_'.$eleve_id);
-            $presnce_deja=$pointage->detailsPointage->firstWhere('Eleves_id',$eleve_id);
-
-            if($presence_id) {
-                 if ($presnce_deja){
-                     $pointage_detail=DetailsPointage::find($presnce_deja->id);
-                     $pointage_detail->presence_id = $presence_id;
-                     $pointage_detail->save();
-
-                 }
-                     else{
-                         $detailsPointage = new DetailsPointage();
-                         $detailsPointage->Eleves_id = $eleve_id;
-                         $detailsPointage->pointage_id = $pointage->id;
-                         $detailsPointage->presence_id = $presence_id;
-                         $detailsPointage->save();
-                }
-
-            }
+        foreach (request('detail_presences') as $detail_presence_id) {
+            $detail_pointage = DetailsPointage::findOrFail($detail_presence_id);
+            $detail_pointage ->ref_etats_presence_id = $request->input('presence_'.$detail_presence_id);
+            $detail_pointage ->save();
         }
     }
-     public function exportExcel(Request $request){
-         $pointages = Pointage::query()->with('classes');
+
+    public function exportExcel(Request $request){
+
+         $pointages = Pointage::query()->with('classe');
          if($request->get('classe')){
              $pointages = $pointages->where('classe_id',$request->get('classe'));
          }
@@ -311,29 +278,38 @@ class PointageController extends Controller
      }
     public function delete($id)
     {
-        $pointage = Pointage::find($id);
-        $pointage->delete();
-        return response()->json([
-            'success' => 'true',
-            'msg' => trans('text.element_well_deleted')
-        ], 200);
+        if (auth()->user()->hasAccess(30,5)){
+            $pointage = Pointage::find($id);
+            $pointage->delete();
+            return response()->json([
+                'success' => 'true',
+                'msg' => trans('text.element_well_deleted')
+            ], 200);
+        }
+
     }
 
-    public function addPresence($persone_id,$presence_id,$pointage_id)
-    {
-        $pointage =Pointage::find($pointage_id);
-        $presnce_deja=$pointage->detailsPointage->firstWhere('Eleves_id',$persone_id);
-        if ($presnce_deja){
-            $pointage_detail=DetailsPointage::find($presnce_deja->id);
-            $pointage_detail->presence_id = $presence_id;
-            $pointage_detail->save();
-        }else{
-            $detailsPointage = new DetailsPointage();
-            $detailsPointage->Eleves_id = $persone_id;
-            $detailsPointage->pointage_id = $pointage->id;
-            $detailsPointage->presence_id = $presence_id;
-            $detailsPointage->save();
-        }
-        return response()->json($pointage->id, 200);
-    }
+//    public function addPresence($persone_id,$presence_id,$pointage_id)
+//    {
+//        $pointage =Pointage::find($pointage_id);
+//        $presnce_deja=$pointage->detailsPointage->firstWhere('Eleves_id',$persone_id);
+//        if ($presnce_deja){
+//            $pointage_detail=DetailsPointage::find($presnce_deja->id);
+//            $pointage_detail->presence_id = $presence_id;
+//            $pointage_detail->save();
+//        }else{
+//            $detailsPointage = new DetailsPointage();
+//            $detailsPointage->Eleves_id = $persone_id;
+//            $detailsPointage->pointage_id = $pointage->id;
+//            $detailsPointage->presence_id = $presence_id;
+//            $detailsPointage->save();
+//        }
+//        return response()->json($pointage->id, 200);
+//    }
+
+  public function validerPointage($pointage_id){
+        $pointage = Pointage::find($pointage_id) ;
+        $pointage->ref_etats_pointage_id = 2 ;
+        $pointage->save();
+  }
 }

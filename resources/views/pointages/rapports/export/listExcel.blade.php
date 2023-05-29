@@ -16,7 +16,6 @@
 {{--        <th scope="col">#</th>--}}
         <th scope="col">nom</th>
         <th scope="col">nni</th>
-        <th scope="col">date</th>
         <th>nombre present</th>
         <th>nombre absent</th>
         <th>nombre absent justifier</th>
@@ -25,19 +24,16 @@
     </tr>
     </thead>
     <tbody>
-    @foreach($detailspointages->get() as $dpointage)
+    @foreach($stagiaires->get() as $stagaire)
         <tr>
 {{--            <td>{{$dpointage->id}}</td>--}}
-            <td>{{$dpointage->pr_stagaire->nom}}</td>
-            <td>{{$dpointage->pr_stagaire->nni}}</td>
-            <td>{{$dpointage->pointage->date}}</td>
+            <td>{{$stagaire->nom}}</td>
+            <td>{{$stagaire->nni}}</td>
+
             @php
-                $count_present=\App\Models\DetailsPointage::query()->where('Eleves_id',$dpointage->Eleves_id)
-                   ->where('presence_id',1)->count();
-                $count_absent = \App\Models\DetailsPointage::query()->where('Eleves_id',$dpointage->Eleves_id)
-               ->where('presence_id',2)->count();
-                $count_abs_jus =\App\Models\DetailsPointage::query()->where('Eleves_id',$dpointage->Eleves_id)
-               ->where('presence_id',3)->count();
+                $count_present=$stagaire->details_pointages->where('ref_etats_presence_id',1)->count();;
+                $count_absent = $stagaire->details_pointages->where('ref_etats_presence_id',2)->count();;
+                $count_abs_jus =$stagaire->details_pointages->where('ref_etats_presence_id',3)->count();;
             @endphp
             <td>{{$count_present}}</td>
             <td>{{$count_absent}}</td>

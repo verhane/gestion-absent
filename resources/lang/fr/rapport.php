@@ -1,8 +1,8 @@
 <?php
 return ['rapport'=>'Rapport',
     'classe'=>'Classe' ,
-    'date debut'=>'Date debut' ,
-    'date fin'=>'Date fin' ,
+    'date debut'=>'du' ,
+    'date fin'=>'au' ,
     'matircule'=>'Matircule',
     'nom'=>'Nom',
     'prenom'=>'Prenom',

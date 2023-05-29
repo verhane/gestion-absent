@@ -1,23 +1,28 @@
 @extends('layouts.admin')
 @section('page-content')
-<x-card>
+    <x-page-header>
     <x-slot name="title">
-       suivi presénce des eleves
+        suivi presénce des eleves
     </x-slot>
+    </x-page-header>
+<x-card>
+
     <x-slot name="heading">
 
         <div class="row ">
-            <div class="col-6 ml-auto" style="position: relative;clear: both
+            <div class="col-12" style="position: relative;clear: both
        ">
                 <form>
                 <x-forms.input
-                     label="recherche " id="nom" name="recherche" placeholder="entrer"
+                     label="{{ trans('suivis.recherche')}} " id="nom" name="recherche" placeholder="entrer"
+
                     onkeyup="getEleve(this.value)"
+                     style="padding-left: 35px"
                 />
 
                 </form>
-{{--                <i class="fa fa-search"style="position: absolute;top: 48%;left: 7%"></i>--}}
-                <ul class="list-group p-0" style="position: absolute;top: 68px; width: 94%;overflow-y: auto;max-height: 250px ">
+                <i class="fa fa-search"style="position: absolute;top: 48%;left:35px"></i>
+                <ul class="list-group p-0" style="position: absolute;top: 68px; width: 97%;overflow-y: auto;max-height: 250px ">
                 </ul>
             </div>
 
@@ -61,19 +66,22 @@
             </x-filtres.element>
         </div>
     </div>
+        <div class="export_pdf" style="display: none">
+            @if(auth()->user()->hasAccess(30,4))
+            <x-export-container>
+                 <x-buttons.btn-export
+                     onclick="getExport('export_pdf_suivi', 'pointages/suivis/exportPdf')"
+                     link='#!'
+                     class="btn-sm btn-primary shadow-sm"
+                     icon="file-pdf"
+                     id="expotPDF"
+                     text="{{ trans('pointage.exportPdf')}}"
+                 >
 
-         <x-export-container>
-             <x-buttons.btn-export
-                 onclick="getExport('export_pdf_suivi', 'suivis/exportPdf')"
-                 link='#!'
-                 class="btn-sm btn-primary shadow-sm"
-                 icon="file-pdf"
-                 id="expotPDF"
-                 text="{{ trans('pointage.exportPdf')}}"
-             >
-
-             </x-buttons.btn-export>
-         </x-export-container>
+                 </x-buttons.btn-export>
+             </x-export-container>
+            @endif
+        </div>
      </form>
     <div id="cont">
 
@@ -90,30 +98,23 @@
         $('.form_periode').hide();
         $('#date_debut').val('');
         $('#date_fin').val('');
-
-        getTheContent("suivis/getEleve/"+valeur ,'.list-group')
-        // console.log(typeof(nom));
-        // $.ajax({
-        //     type: "GET",
-        //     url:racine+ "suivis/getEleve/"+nom,
-        //     success: function(data){
-        //         $("#cont").html(data);
-        //         console.log(data)
-        //     }
-        // })
-        $('.list-group').css('display','block');
+        $('.export_pdf').hide();
+        if(val.length >= 3){
+            getTheContent("pointages/suivis/getEleve/"+valeur ,'.list-group');
+            $('.list-group').css('display','block');
+        }
 
     }
     function getDetEleve(eleve_id){
         let dateDebut = $('#date_debut').val();
         let dateFin = $('#date_fin').val();
-        let url="suivis/getDetEleve/"+eleve_id;
+        let url="pointages/suivis/getDetEleve/"+eleve_id;
         let eleve_input = $('#eleve_id') ;
         eleve_input.val(eleve_id);
         // alert(eleve_input.val());
-       if (dateDebut !==undefined){
-          url+='/'+dateDebut;
-       }
+        if (dateDebut !==undefined){
+            url+='/'+dateDebut;
+        }
         if (dateFin !==undefined){
             url+='/' + dateFin;
         }
@@ -126,13 +127,13 @@
             },
             error: function (request, error) {
                 console.log(error);
-                alert(" date fin doit etre superieur ou egale date debut: ");
+                // alert(" date fin doit etre superieur ou egale date debut: ");
             }
         })
         // getTheContent(url ,'#cont');
         $('.list-group').css('display','none');
         $('.form_periode').show();
-
+        $('.export_pdf').show();
 
 
 

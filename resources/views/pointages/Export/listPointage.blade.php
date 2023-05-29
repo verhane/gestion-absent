@@ -18,8 +18,8 @@
         padding-top: 12px;
         padding-bottom: 12px;
         text-align: left;
-        background-color: #04AA6D;
-        color: white;
+        /*background-color: #04AA6D;*/
+        color: black;
     }
     .tete{
         text-align: center ;
@@ -39,7 +39,7 @@
 
 @endif
     @if($date_debut !='' && $date_fin !='')
-        <h4>periode du {{$date_debut}} ou {{$date_fin}} s</h4>
+        <h4>periode du {{$date_debut}} ou {{$date_fin}} </h4>
     @endif
 </div>
 <table class="table table-bordered"   id="pointage">
@@ -53,7 +53,7 @@
 
         <th scope="col">Pointeur</th>
         <th scope="col">Date</th>
-        <th scope="col">Heures</th>
+        <th scope="col">Heure</th>
         {{--        <th scope="col">libelle_fr</th>--}}
 
     </tr>
@@ -63,11 +63,11 @@
         <tr>
 {{--            <td>{{$pointage->id}}</td>--}}
             @if($classe_id == '')
-            <td>{{$pointage->classes->libelle_fr}}</td>
+            <td>{{$pointage->classe->libelle_fr}}</td>
             @endif
             <td>{{$pointage->pointeur->name}}</td>
             <td>{{$pointage->date}}</td>
-            <td>{{$pointage->heures}}</td>
+            <td>{{$pointage->heure}}</td>
         </tr>
     @endforeach
     </tbody>

@@ -13,10 +13,10 @@
     @foreach($pointages->get() as $pointage)
         <tr>
 {{--            <td>{{$pointage->id}}</td>--}}
-            <td>{{$pointage->classes->libelle_fr}}</td>
+            <td>{{$pointage->classe->libelle_fr}}</td>
             <td>{{$pointage->pointeur->name}}</td>
             <td>{{$pointage->date}}</td>
-            <td>{{$pointage->heures}}</td>
+            <td>{{$pointage->heure}}</td>
         </tr>
     @endforeach
     </tbody>

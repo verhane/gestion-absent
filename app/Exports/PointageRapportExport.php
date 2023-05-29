@@ -5,7 +5,7 @@ namespace App\Exports;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
-class RapportExport implements FromView
+class PointageRapportExport implements FromView
 {
     /**
     * @return \Illuminate\Support\Collection

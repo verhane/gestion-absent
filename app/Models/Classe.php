@@ -42,7 +42,7 @@ class Classe extends Eloquent
     }
     public function annees_scolaire()
     {
-        return $this->belongsTo(AnneesScolaire::class);
+        return $this->belongsTo(AnneesScolaire::class ,'annees_scolaire_id');
     }
 
     public function NbCours()
@@ -70,7 +70,7 @@ class Classe extends Eloquent
                     ->withTimestamps();
     }
 
-    public function pr_stagieres()
+    public function pr_stagiaires()
     {
         return $this->belongsToMany(PrStagiaire::class, 'classes_pr_stagiaires')
                     ->withPivot('id', 'deleted_at')

@@ -13,7 +13,7 @@ class CreatePresentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('ref_presents', function (Blueprint $table) {
+        Schema::create('ref_etats_presences', function (Blueprint $table) {
             $table->id();
             $table->string('libelle_fr');
             $table->string('libelle_ar');

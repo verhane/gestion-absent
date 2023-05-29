@@ -11,17 +11,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Pointage extends Model
 {
     use HasFactory;
-    protected $table = 'pointages';
-    public  function classes(){
-         return $this->belongsTo(Classe::class,'classe_id');
+    protected $dates = [
+        'date'=>'date_format:d/m/yyyy',	];
+
+    public function classe()
+    {
+        return $this->belongsTo(Classe::class);
     }
 
-    public function detailsPointage()
+    public function details_pointages()
     {
-        return $this->hasMany(DetailsPointage::class,'pointage_id');
+        return $this->hasMany(DetailsPointage::class);
     }
-    public function pointeur(): BelongsTo
+
+    public function pointeur()
     {
-        return $this->belongsTo(SysUser::class,'personne');
+        return $this->belongsTo(SysUser::class, 'sys_user_id');
+    }
+    public function ref_etats_pointage()
+    {
+        return $this->belongsTo(ref_etats_pointages::class, 'ref_etats_pointage_id');
     }
 }

@@ -18,8 +18,8 @@
         padding-top: 12px;
         padding-bottom: 12px;
         text-align: left;
-        background-color: #04AA6D;
-        color: white;
+        /*background-color: #04AA6D;*/
+        color: black;
     }
     h2 ,h4{
         font-weight: 300    ;
@@ -36,13 +36,18 @@
 @endif
 @php
 $eleve = \App\Models\PrStagiaire::find($eleve_id) ;
+$absence_count = \App\Models\DetailsPointage::query()->where('pr_stagiaire_id',$eleve_id)->where('ref_etats_presence_id',2)->count();
+$pointage_count = \App\Models\DetailsPointage::query()->where('pr_stagiaire_id',$eleve_id)->count();
+$taux_absence =  $absence_count / $pointage_count ;
+$taux_absence_format = number_format($taux_absence, 2);
 @endphp
 <h2 style="text-align: left">Nom:{{$eleve->nom}} {{$eleve->prenom}}</h2>
+<h2 style="text-align: left">Taux absence: {{$taux_absence_format}}%</h2>
 <table class="table table-bordered"   id="pointage">
     <thead>
     <tr>
 
-
+        <th>Classe</th>
         <th>Date</th>
         <th>Heure</th>
         <th>Etat</th>
@@ -54,10 +59,10 @@ $eleve = \App\Models\PrStagiaire::find($eleve_id) ;
     <tbody>
     @foreach($detailsPointage->get() as $dpointage)
         <tr>
-            {{--            <td>{{$dpointage->id}}</td>--}}
+            <td>{{$dpointage->pointage->classe->libelle_fr}}</td>
             <td>{{$dpointage->pointage->date}}</td>
-            <td>{{$dpointage->pointage->heures}}</td>
-            <td>{{$dpointage->presences->libelle_fr}}</td>
+            <td>{{$dpointage->pointage->heure}}</td>
+            <td>{{$dpointage->ref_etats_presence->libelle_fr}}</td>
 
 
 

@@ -18,8 +18,8 @@
         padding-top: 12px;
         padding-bottom: 12px;
         text-align: left;
-        background-color: #04AA6D;
-        color: white;
+        /*background-color: #04AA6D;*/
+        color: black;
     }
     h2 ,h4{
         font-weight: 300    ;
@@ -27,7 +27,7 @@
     }
 </style>
 
-@include('globales.entete')
+{{--@include('globales.entete')--}}
 
 <h2>liste de rapprots</h2>
 @if($classe != '')
@@ -46,28 +46,24 @@
 
         <th scope="col">nom</th>
         <th scope="col">nni</th>
-
-        <th>nombre present</th>
-        <th>nombre absent</th>
-        <th>nombre absent justifier</th>
+        <th>nbre present</th>
+        <th>nbre absent</th>
+        <th>nbre absent justifier</th>
         {{--        <th scope="col">libelle_fr</th>--}}
 
     </tr>
     </thead>
     <tbody>
-    @foreach($detailsPointage->get() as $dpointage)
+    @foreach($stagaires->get() as $stagaire)
         <tr>
 {{--            <td>{{$dpointage->id}}</td>--}}
-            <td>{{$dpointage->pr_stagaire->nom}} {{$dpointage->pr_stagaire->prenom}}</td>
-            <td>{{$dpointage->pr_stagaire->nni}}</td>
+            <td>{{$stagaire->nom}} {{$stagaire->prenom}}</td>
+            <td>{{$stagaire->nni}}</td>
 {{--            <td>{{$dpointage->pointage->date}}</td>--}}
             @php
-                 $count_present=\App\Models\DetailsPointage::query()->where('Eleves_id',$dpointage->Eleves_id)
-                    ->where('presence_id',1)->count();
-                 $count_absent = \App\Models\DetailsPointage::query()->where('Eleves_id',$dpointage->Eleves_id)
-                ->where('presence_id',2)->count();
-                 $count_abs_jus =\App\Models\DetailsPointage::query()->where('Eleves_id',$dpointage->Eleves_id)
-                ->where('presence_id',3)->count();
+                 $count_present=$stagaire->details_pointages->where('ref_etats_presence_id',1)->count();
+                 $count_absent = $stagaire->details_pointages->where('ref_etats_presence_id',2)->count();
+                 $count_abs_jus =$stagaire->details_pointages->where('ref_etats_presence_id',3)->count();
             @endphp
             <td>{{$count_present}}</td>
             <td>{{$count_absent}}</td>
