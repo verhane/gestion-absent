@@ -47,8 +47,8 @@ Route::post('login', function (){
 
 Route::middleware('auth:sanctum')->group(function (){
             Route::get('/getLastPointages/{user_id}',function($userId){
-                $pointagesLast = Pointage::query()->where('sys_user_id',$userId)->with(['classe','pointeur'])->latest()->limit(3)->get();
-                $sys_user = auth()->user()->name ;
+                $pointagesLast = Pointage::query()->where('sys_user_id',request()->user()->id)->with(['classe','pointeur'])->latest()->limit(3)->get();
+                $sys_user = request()->user()->name ;
                 return response()->json([$pointagesLast ,$sys_user]);
             });
             Route::get('/classes',function(){
